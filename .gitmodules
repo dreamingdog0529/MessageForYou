@@ -1,0 +1,3 @@
+[submodule "Assets/ThirdParty"]
+	path = Assets/ThirdParty
+	url = https://github.com/dreamingdog0529/MessageForYou-ThirdParty.git
