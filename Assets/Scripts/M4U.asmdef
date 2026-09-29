@@ -1,0 +1,25 @@
+{
+    "name": "M4U",
+    "rootNamespace": "M4U",
+    "references": [
+        "UniTask",
+        "UniTask.Addressables",
+        "R3.Unity",
+        "VContainer",
+        "Unity.InputSystem",
+        "Unity.Addressables",
+        "Unity.ResourceManager",
+        "ECM2"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "R3.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
