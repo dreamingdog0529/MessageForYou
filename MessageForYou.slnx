@@ -1,4 +1,11 @@
 ﻿<Solution>
-  <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="DOTweenPro.EditorScripts.csproj" />
+  <Project Path="M4U.Tests.PlayMode.csproj" />
+  <Project Path="M4U.csproj" />
+  <Project Path="ECM2.csproj" />
+  <Project Path="DOTweenPro.Scripts.csproj" />
+  <Project Path="DOTween.Modules.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
+  <Project Path="M4U.Tests.EditMode.csproj" />
 </Solution>
