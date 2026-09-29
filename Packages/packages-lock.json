@@ -7,6 +7,22 @@
       "dependencies": {},
       "hash": "160444836baf08941528a3667220600cb9047452"
     },
+    "com.cysharp.r3": {
+      "version": "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.modules.imgui": "1.0.0"
+      },
+      "hash": "fdfb36e3d5af90ec06403714492ee85b2d8bf7cd"
+    },
+    "com.cysharp.unitask": {
+      "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "ceac8d6946b1125fe782cd171fbcb245b567dbf9"
+    },
     "com.github-glitchenzo.nugetforunity": {
       "version": "https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity",
       "depth": 0,
@@ -203,6 +219,13 @@
         "com.unity.modules.jsonserialize": "1.0.0"
       },
       "url": "https://packages.unity.com"
+    },
+    "jp.hadashikick.vcontainer": {
+      "version": "https://github.com/hadashiA/VContainer.git?path=VContainer/Assets/VContainer",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "4fc1ed47dff1314e73fbf2a85ab88f53601414f6"
     },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",

@@ -149,7 +149,8 @@ PlayerSettings:
   visionOSBundleVersion: 1.0
   tvOSBundleVersion: 1.0
   bundleVersion: 0.1.0
-  preloadedAssets: []
+  preloadedAssets:
+  - {fileID: 11400000, guid: db99fbd533715a64387dedb5031a7f06, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   xboxOneDisableKinectGpuReservation: 1
@@ -832,7 +833,25 @@ PlayerSettings:
   webGLCloseOnQuit: 0
   webWasm2023: 1
   webEnableSubmoduleStrippingCompatibility: 0
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    Android: DOTWEEN;DOTWEEN_TEXTMESHPRO
+    EmbeddedLinux: DOTWEEN;DOTWEEN_TEXTMESHPRO
+    GameCoreScarlett: DOTWEEN;DOTWEEN_TEXTMESHPRO
+    GameCoreXboxOne: DOTWEEN;DOTWEEN_TEXTMESHPRO
+    Kepler: DOTWEEN;DOTWEEN_TEXTMESHPRO
+    LinuxHeadlessSimulation: DOTWEEN;DOTWEEN_TEXTMESHPRO
+    Nintendo Switch: DOTWEEN;DOTWEEN_TEXTMESHPRO
+    Nintendo Switch 2: DOTWEEN;DOTWEEN_TEXTMESHPRO
+    PS4: DOTWEEN;DOTWEEN_TEXTMESHPRO
+    PS5: DOTWEEN;DOTWEEN_TEXTMESHPRO
+    QNX: DOTWEEN;DOTWEEN_TEXTMESHPRO
+    Standalone: UNITASK_DOTWEEN_SUPPORT;DOTWEEN;DOTWEEN_TEXTMESHPRO
+    VisionOS: DOTWEEN;DOTWEEN_TEXTMESHPRO
+    WebGL: UNITASK_DOTWEEN_SUPPORT;DOTWEEN;DOTWEEN_TEXTMESHPRO
+    Windows Store Apps: UNITASK_DOTWEEN_SUPPORT;DOTWEEN;DOTWEEN_TEXTMESHPRO
+    XboxOne: DOTWEEN;DOTWEEN_TEXTMESHPRO
+    iPhone: DOTWEEN;DOTWEEN_TEXTMESHPRO
+    tvOS: DOTWEEN;DOTWEEN_TEXTMESHPRO
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
