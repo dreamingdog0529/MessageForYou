@@ -4,6 +4,7 @@ using Cysharp.Threading.Tasks;
 using M4U.Input;
 using R3;
 using VContainer.Unity;
+using UnityEngine;
 
 namespace M4U.Player
 {
@@ -22,6 +23,7 @@ namespace M4U.Player
         public UniTask StartAsync(CancellationToken cancellation = default)
         {
             var d1 = _inputService.Player
+                .Do(x => Debug.Log($"Input: {x}"))
                 .Pairwise()
                 .Subscribe(HandleUpdate);
 
@@ -30,17 +32,17 @@ namespace M4U.Player
             return UniTask.CompletedTask;
         }
 
-        private void HandleUpdate((PlayerInputSnapshot Current, PlayerInputSnapshot Previous) input)
+        private void HandleUpdate((PlayerInputSnapshot Previous, PlayerInputSnapshot Current) input)
         {
-            var (current, prev) = input;
+            var (previous, current) = input;
 
             _mover.Move(current.Horizontal, current.Vertical);
 
-            if (current.Jump && !prev.Jump)
+            if (current.Jump && !previous.Jump)
             {
                 _mover.Jump();
             }
-            else if (!current.Jump && prev.Jump)
+            else if (!current.Jump && previous.Jump)
             {
                 _mover.StopJumping();
             }
