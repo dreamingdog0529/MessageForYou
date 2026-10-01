@@ -29,6 +29,12 @@ public interface ISceneNavigator
 
     /// <summary>履歴の直前のシーンに戻る 履歴が空なら false を返す</summary>
     UniTask<bool> BackAsync(CancellationToken cancellation = default);
+
+    /// <summary>
+    /// 遷移を経由せずにロードされたアクティブシーン（エディタで直接再生したシーン）を現シーンとして引き継ぎ、エントリポイントを実行する。
+    /// 引き継げるシーンがなければ false を返す
+    /// </summary>
+    UniTask<bool> TryEnterLoadedSceneAsync(CancellationToken cancellation = default);
 }
 
 /// <remarks>
@@ -85,6 +91,48 @@ public sealed class SceneNavigator : ISceneNavigator, IDisposable
         var entry = _history.Peek();
         await TransitionAsync(entry.Definition, entry.Args, entry.State, SceneTransitionMode.Back, cancellation);
         return true;
+    }
+
+    public async UniTask<bool> TryEnterLoadedSceneAsync(CancellationToken cancellation = default)
+    {
+        ThrowIfCannotTransition();
+        if (_current != null) throw new InvalidOperationException("A scene has already been entered");
+
+        var scene = SceneManager.GetActiveScene();
+        var scope = FindStandaloneScope(scene);
+        if (scope == null) return false;
+
+        cancellation.ThrowIfCancellationRequested();
+
+        IsTransitioning = true;
+        try
+        {
+            var definition = scope.StandaloneDefinition!;
+            var entrypoint = scope.ResolveEntrypoint();
+            _current = new ActiveScene(definition, null, new LoadedSceneLoader(definition.Key, scene), entrypoint);
+            await entrypoint.InvokeEnterAsync(scope.EnterContext!, _disposeToken);
+        }
+        finally
+        {
+            IsTransitioning = false;
+        }
+
+        return true;
+    }
+
+    private static SceneLifetimeScope? FindStandaloneScope(Scene scene)
+    {
+        if (!scene.IsValid() || !scene.isLoaded) return null;
+
+        foreach (var root in scene.GetRootGameObjects())
+        {
+            var scope = root.GetComponentInChildren<SceneLifetimeScope>(true);
+            if (scope == null) continue;
+
+            return scope.IsStandalone && scope.Container != null ? scope : null;
+        }
+
+        return null;
     }
 
     private async UniTask TransitionAsync(
@@ -196,7 +244,7 @@ public sealed class SceneNavigator : ISceneNavigator, IDisposable
             var scope = root.GetComponentInChildren<SceneLifetimeScope>(true);
             if (scope == null) continue;
 
-            if (scope.Container == null || scope.EnterContext == null)
+            if (scope.Container == null || scope.EnterContext == null || scope.IsStandalone)
             {
                 throw new InvalidOperationException($"{nameof(SceneLifetimeScope)} in {definition} was not built by {nameof(SceneNavigator)}");
             }

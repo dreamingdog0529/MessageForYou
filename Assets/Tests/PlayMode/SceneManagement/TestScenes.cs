@@ -32,6 +32,9 @@ public static class TestScenes
 
     /// <summary>SceneLifetimeScope を持たないシーン</summary>
     public static readonly SceneDefinition<int, CounterState> WithoutScope = new(SceneKey.Builtin("TestSceneEmpty"));
+
+    /// <summary>A のスコープを持つが、ロード時に SceneNavigator のバインディングを受け取らずに単独起動扱いで構築される</summary>
+    public static readonly SceneDefinition<int, CounterState> Unbound = new(SceneKey.Builtin("TestSceneUnbound"));
 }
 
 public abstract class RecordingEntrypoint<TArgs, TState> : SceneEntrypoint<TArgs, TState>

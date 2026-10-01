@@ -24,8 +24,26 @@ public abstract class SceneDefinition
         object? args,
         object? restoredState);
 
+    /// <summary>遷移元を持たない起動用のコンテキスト。Args は default になる</summary>
+    internal abstract SceneEnterContext CreateDefaultEnterContext();
+
     /// <summary>エントリポイントの型が Args と State の型に一致するか。インスタンスを生成せずに整合性を確認するために使う</summary>
     internal abstract bool Accepts(Type entrypointType);
+
+    /// <summary>エントリポイントの型から Args と State の型を取り出して定義を作る</summary>
+    internal static SceneDefinition ForEntrypoint(Type entrypointType, SceneKey key)
+    {
+        for (var type = entrypointType; type != null; type = type.BaseType)
+        {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(SceneEntrypoint<,>))
+            {
+                var definitionType = typeof(SceneDefinition<,>).MakeGenericType(type.GetGenericArguments());
+                return (SceneDefinition)Activator.CreateInstance(definitionType, key);
+            }
+        }
+
+        throw new ArgumentException($"{entrypointType} does not derive from {typeof(SceneEntrypoint<,>)}", nameof(entrypointType));
+    }
 
     public override string ToString() => Key.ToString();
 }
@@ -46,6 +64,9 @@ public sealed class SceneDefinition<TArgs, TState> : SceneDefinition
         object? args,
         object? restoredState)
         => new SceneEnterContext<TArgs, TState>(Key, mode, from, (TArgs)args!, (TState?)restoredState);
+
+    internal override SceneEnterContext CreateDefaultEnterContext()
+        => new SceneEnterContext<TArgs, TState>(Key, SceneTransitionMode.Reset, null, default!, null);
 
     internal override bool Accepts(Type entrypointType)
         => typeof(SceneEntrypoint<TArgs, TState>).IsAssignableFrom(entrypointType);

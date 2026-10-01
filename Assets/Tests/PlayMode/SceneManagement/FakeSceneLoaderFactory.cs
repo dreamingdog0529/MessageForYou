@@ -14,6 +14,7 @@ namespace M4U.Tests.SceneManagement;
 public sealed class FakeSceneLoaderFactory : ISceneLoaderFactory
 {
     private readonly Dictionary<string, Type?> _scopeTypes = new();
+    private readonly HashSet<string> _unbound = new();
     private readonly List<FakeSceneLoader> _loaded = new();
     private int _sceneCounter;
 
@@ -23,6 +24,13 @@ public sealed class FakeSceneLoaderFactory : ISceneLoaderFactory
     {
         _scopeTypes[definition.Key.Name] = scopeType;
         return this;
+    }
+
+    /// <summary>スコープの構築前に SceneNavigator のバインディングを破棄し、単独起動扱いで構築させる</summary>
+    public FakeSceneLoaderFactory MapUnbound(SceneDefinition definition, Type scopeType)
+    {
+        _unbound.Add(definition.Key.Name);
+        return Map(definition, scopeType);
     }
 
     public ISceneLoader Create(SceneKey key)
@@ -75,6 +83,7 @@ public sealed class FakeSceneLoaderFactory : ISceneLoaderFactory
                 SceneManager.MoveGameObjectToScene(gameObject, Scene);
 
                 Scope = (SceneLifetimeScope)gameObject.AddComponent(_scopeType);
+                if (_owner._unbound.Contains(Key.Name)) SceneScopeBinding.Consume();
 
                 // 実シーンのロードと同様に、ロード中の Awake でスコープを構築させる
                 gameObject.SetActive(true);

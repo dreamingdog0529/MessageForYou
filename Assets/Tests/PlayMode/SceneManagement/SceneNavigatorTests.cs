@@ -18,6 +18,7 @@ public sealed class SceneNavigatorTests
     private FakeSceneLoaderFactory _loaderFactory = null!;
     private LifetimeScope _rootScope = null!;
     private SceneNavigator _navigator = null!;
+    private Scene _standaloneScene;
 
     [SetUp]
     public void SetUp()
@@ -26,7 +27,8 @@ public sealed class SceneNavigatorTests
         _loaderFactory = new FakeSceneLoaderFactory()
             .Map(TestScenes.A, typeof(SceneALifetimeScope))
             .Map(TestScenes.B, typeof(SceneBLifetimeScope))
-            .Map(TestScenes.WithoutScope, null);
+            .Map(TestScenes.WithoutScope, null)
+            .MapUnbound(TestScenes.Unbound, typeof(SceneALifetimeScope));
 
         var recorder = _recorder;
         _rootScope = LifetimeScope.Create(builder => builder.RegisterInstance(recorder), "TestRootScope");
@@ -38,7 +40,101 @@ public sealed class SceneNavigatorTests
     {
         _navigator.Dispose();
         await _loaderFactory.UnloadAllAsync();
+        if (_standaloneScene.IsValid() && _standaloneScene.isLoaded)
+        {
+            await SceneManager.UnloadSceneAsync(_standaloneScene).ToUniTask();
+        }
         if (_rootScope != null) UnityEngine.Object.Destroy(_rootScope.gameObject);
+    });
+
+    /// <summary>エディタでシーンを直接再生した状態を再現する。SceneNavigator を経由せずにスコープを構築し、アクティブシーンにする</summary>
+    private SceneLifetimeScope CreateStandaloneScene(Type scopeType)
+    {
+        _standaloneScene = SceneManager.CreateScene("StandaloneScene");
+
+        var gameObject = new GameObject("SceneScope");
+        gameObject.SetActive(false);
+        SceneManager.MoveGameObjectToScene(gameObject, _standaloneScene);
+
+        var scope = (SceneLifetimeScope)gameObject.AddComponent(scopeType);
+        scope.parentReference.Object = _rootScope;
+        gameObject.SetActive(true);
+
+        SceneManager.SetActiveScene(_standaloneScene);
+        return scope;
+    }
+
+    [Test]
+    public void StandaloneScope_IsBuiltWithDefaultContext()
+    {
+        var scope = CreateStandaloneScene(typeof(SceneALifetimeScope));
+
+        Assert.That(scope.IsStandalone, Is.True);
+        Assert.That(scope.Parent, Is.SameAs(_rootScope));
+
+        var context = (SceneEnterContext<int, CounterState>)scope.Container.Resolve<SceneEnterContext>();
+        Assert.That(context.Scene, Is.EqualTo(SceneKey.Builtin("StandaloneScene")));
+        Assert.That(context.Mode, Is.EqualTo(SceneTransitionMode.Reset));
+        Assert.That(context.From, Is.Null);
+        Assert.That(context.Args, Is.EqualTo(0));
+        Assert.That(context.RestoredState, Is.Null);
+    }
+
+    [UnityTest]
+    public IEnumerator TryEnterLoadedScene_EntersStandaloneScene() => UniTask.ToCoroutine(async () =>
+    {
+        var scope = CreateStandaloneScene(typeof(SceneALifetimeScope));
+
+        var entered = await _navigator.TryEnterLoadedSceneAsync();
+
+        Assert.That(entered, Is.True);
+        Assert.That(_recorder.Enters, Has.Count.EqualTo(1));
+        Assert.That(_recorder.Enters[0], Is.SameAs(scope.EnterContext));
+        Assert.That(_recorder.InjectedContexts[0], Is.SameAs(_recorder.Enters[0]));
+        Assert.That(_navigator.Current, Is.EqualTo(SceneKey.Builtin("StandaloneScene")));
+        Assert.That(_navigator.CanGoBack, Is.False);
+        Assert.That(_navigator.IsTransitioning, Is.False);
+    });
+
+    [UnityTest]
+    public IEnumerator TryEnterLoadedScene_ThenReset_UnloadsStandaloneScene() => UniTask.ToCoroutine(async () =>
+    {
+        CreateStandaloneScene(typeof(SceneALifetimeScope));
+        await _navigator.TryEnterLoadedSceneAsync();
+
+        await _navigator.ResetAsync(TestScenes.B, "next");
+
+        Assert.That(_recorder.Exits[0].Scene, Is.EqualTo(SceneKey.Builtin("StandaloneScene")));
+        Assert.That(_standaloneScene.isLoaded, Is.False);
+        Assert.That(_navigator.Current, Is.EqualTo(TestScenes.B.Key));
+    });
+
+    [UnityTest]
+    public IEnumerator TryEnterLoadedScene_WithoutStandaloneScope_ReturnsFalse() => UniTask.ToCoroutine(async () =>
+    {
+        var entered = await _navigator.TryEnterLoadedSceneAsync();
+
+        Assert.That(entered, Is.False);
+        Assert.That(_navigator.Current, Is.Null);
+        Assert.That(_recorder.Enters, Is.Empty);
+    });
+
+    [UnityTest]
+    public IEnumerator TryEnterLoadedScene_AfterEntering_Throws() => UniTask.ToCoroutine(async () =>
+    {
+        await _navigator.ResetAsync(TestScenes.A, 1);
+
+        await AssertThrowsAsync<InvalidOperationException>(async () => await _navigator.TryEnterLoadedSceneAsync());
+    });
+
+    [UnityTest]
+    public IEnumerator TransitionToSceneWithStandaloneScope_ThrowsAndUnloadsScene() => UniTask.ToCoroutine(async () =>
+    {
+        await AssertThrowsAsync<InvalidOperationException>(() => _navigator.ResetAsync(TestScenes.Unbound, 0));
+
+        Assert.That(_navigator.Current, Is.Null);
+        Assert.That(_loaderFactory.Loaded, Is.Empty);
+        Assert.That(_recorder.Enters, Is.Empty);
     });
 
     [UnityTest]

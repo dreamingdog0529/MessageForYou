@@ -42,7 +42,7 @@ namespace M4U.App.Scenes
                 .Where(x => x.Cancel)
                 .Subscribe(_ => QuitApp());
 
-            if (_initialScene != null)
+            if (!await _sceneNavigator.TryEnterLoadedSceneAsync(cancellation) && _initialScene != null)
             {
                 await _sceneNavigator.ResetAsync(_initialScene, Unit.Default, cancellation);
             }

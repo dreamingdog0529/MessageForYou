@@ -69,3 +69,38 @@ public sealed class BuiltinSceneLoader : ISceneLoader
         if (operation != null) await operation.ToUniTask();
     }
 }
+
+/// <summary>遷移を経由せずに既にロードされているシーンを保持し、アンロードだけを担う</summary>
+public sealed class LoadedSceneLoader : ISceneLoader
+{
+    public SceneKey Key { get; }
+    private Scene _scene;
+
+    public LoadedSceneLoader(SceneKey key, Scene scene)
+    {
+        if (!scene.IsValid() || !scene.isLoaded) throw new ArgumentException("Scene must be loaded", nameof(scene));
+
+        Key = key;
+        _scene = scene;
+    }
+
+    public UniTask<Scene> LoadAsync(CancellationToken cancellation)
+        => throw new InvalidOperationException($"{nameof(LoadedSceneLoader)} cannot load scenes: {Key}");
+
+    public async UniTask UnloadAsync()
+    {
+        if (!_scene.IsValid() || !_scene.isLoaded) return;
+
+        var scene = _scene;
+        _scene = default;
+
+        // 最後にロードされているシーンはアンロードできないため、受け皿となる空のシーンを先に作る
+        if (SceneManager.loadedSceneCount == 1)
+        {
+            SceneManager.SetActiveScene(SceneManager.CreateScene("Empty"));
+        }
+
+        var operation = SceneManager.UnloadSceneAsync(scene);
+        if (operation != null) await operation.ToUniTask();
+    }
+}
