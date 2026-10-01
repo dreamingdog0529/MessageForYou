@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3396481122066493699}
   - component: {fileID: 5567447529940945266}
   m_Layer: 0
-  m_Name: RootEntrypoint
+  m_Name: RootLifetimeScope
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -41,11 +41,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 2469118651271212281}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 354aaee96c6dd4c4d9f7285c699f0f26, type: 3}
+  m_Script: {fileID: 11500000, guid: 7316ee0c1dec93f4c971dc44f74c3992, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: M4U.Composite::M4U.Composite.RootLifetimeScope
+  m_EditorClassIdentifier: M4U::M4U.App.Scenes.RootLifetimeScope
   parentReference:
     TypeName: 
   autoRun: 1
   autoInjectGameObjects: []
-  _rootPrefab: {fileID: 0}
+  _initialSceneType: 0
+  _initialSceneName: 

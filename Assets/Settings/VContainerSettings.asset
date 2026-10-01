@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9cf4d8df1d704d5689f3c69bd70d1cb9, type: 3}
   m_Name: VContainerSettings
   m_EditorClassIdentifier: VContainer::VContainer.Unity.VContainerSettings
-  RootLifetimeScope: {fileID: 0}
+  RootLifetimeScope: {fileID: 5567447529940945266, guid: 9cfd93338dfdd3f4189f805cfbc2b5d4, type: 3}
   EnableDiagnostics: 0
   DisableScriptModifier: 1
   RemoveClonePostfix: 1
